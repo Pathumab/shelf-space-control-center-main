@@ -1,26 +1,44 @@
 stages:
-  - build
+  - install
   - test
+  - build
   - deploy
 
-build_job:
-  stage: build
-  image: python:3.11
-  script:
-    - pip install -r requirements.txt
-    - python setup.py build
+variables:
+  NODE_ENV: development
 
-test_job:
+cache:
+  paths:
+    - node_modules/
+
+install_dependencies:
+  stage: install
+  image: node:20
+  script:
+    - npm ci
+
+test_app:
   stage: test
-  image: python:3.11
+  image: node:20
   script:
-    - pip install -r requirements.txt
-    - pytest tests/
+    - npm run test -- --watchAll=false
 
-deploy_job:
-  stage: deploy
-  image: alpine:latest
+build_app:
+  stage: build
+  image: node:20
   script:
-    - echo "Deploying application..."
+    - npm run build
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 week
+
+deploy_app:
+  stage: deploy
+  image: node:20
+  script:
+    - echo "Deploying React App..."
+    # - rsync or scp or Firebase or Netlify commands
   only:
     - main
+  when: manual
