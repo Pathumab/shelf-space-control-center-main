@@ -1,0 +1,26 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+  stage: build
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - python setup.py build
+
+test_job:
+  stage: test
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - pytest tests/
+
+deploy_job:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying application..."
+  only:
+    - main
